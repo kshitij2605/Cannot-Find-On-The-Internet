@@ -1,0 +1,83 @@
+#include<iostream>
+#include<cstdlib>
+#include<ctime>
+using namespace std;
+
+int median(int A[], int i1, int i2, int i3)
+{
+    if(A[i1]>=A[i2] and A[i1]<=A[i3] or A[i1]<=A[i2] and A[i1]>=A[i3])
+        return i1;
+    else if(A[i2]>=A[i3] and A[i2]<=A[i1] or A[i2]<=A[i3] and A[i2]>=A[i1])
+        return i2;
+    else
+        return i3;
+}
+
+int partition(int A[], int low, int high)
+{
+    int pivot=A[high];
+    int i=low-1;
+    for(int j=low; j<high; j++)
+    {
+        if(A[j]<pivot)
+        {
+            i++;
+            int temp=A[i];
+            A[i]=A[j];
+            A[j]=temp;
+        }
+    }
+    i++;
+    int temp=A[i];
+    A[i]=A[high];
+    A[high]=temp;
+    return i;
+}
+
+int randomizedPartition(int A[], int low, int high)
+{
+    int i1=rand()%(high-low+1);
+    int i2=rand()%(high-low+1);
+    while(i1==i2)
+    {
+        i2=rand()%(high-low+1);
+    }
+    int i3=rand()%(high-low+1);
+    while(i1==i3 or i2==i3)
+    {
+        i3=rand()%(high-low+1);
+    }
+    int i=median(A,i1,i2,i3);
+    int temp=A[high];
+    A[high]=A[i];
+    A[i]=temp;
+    return partition(A,low,high);
+}
+
+void randomizedQuicksort(int A[], int low, int high)
+{
+    if(low<high)
+    {
+        int pivot=randomizedPartition(A,low,high);
+        randomizedQuicksort(A,low,pivot-1);
+        randomizedQuicksort(A,pivot+1,high);
+    }
+}
+
+int main()
+{
+    int N;
+    cin>>N;
+    int A[N];
+    for(int i=0; i<N; i++)
+    {
+        cin>>A[i];
+    }
+    srand(time(0));
+    randomizedQuicksort(A,0,N-1);
+    for(int i=0; i<N; i++)
+    {
+        cout<<A[i]<<' ';
+    }
+    return 0;
+}

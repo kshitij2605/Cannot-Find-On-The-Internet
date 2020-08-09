@@ -1,0 +1,189 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void add(vector< vector<int>> &A, vector< vector<int>> &B, vector< vector<int>> &C, int n)
+{
+    for(int i=0; i<n; i++)
+    {
+        for(int j=0; j<n; j++)
+        {
+            C[i][j]=A[i][j]+B[i][j];
+        }
+    }
+}
+
+void sub(vector< vector<int>> &A, vector< vector<int>> &B, vector< vector<int>> &C, int n)
+{
+    for(int i=0; i<n; i++)
+    {
+        for(int j=0; j<n; j++)
+        {
+            C[i][j]=A[i][j]-B[i][j];
+        }
+    }
+}
+
+void matrixMultiply(vector< vector<int>> &A, vector< vector<int>> &B, vector< vector<int>> &C, int n)
+{
+    if(n==1)
+    {
+        C[0][0]=A[0][0]*B[0][0];
+        return;
+    }
+    else
+    {
+        n/=2;
+        vector<int> row(n,0);
+        
+        vector< vector<int>>  A11(n, row),A12(n, row),A21(n, row),A22(n, row),
+                            B11(n, row),B12(n, row),B21(n, row),B22(n, row),
+                            C11(n, row),C12(n, row),C21(n, row),C22(n, row),
+                            s1(n, row),
+                            s2(n, row),
+                            s3(n, row),
+                            s4(n, row),
+                            s5(n, row),
+                            s6(n, row),
+                            s7(n, row),
+                            s8(n, row),
+                            s9(n, row),
+                            s10(n, row),
+                            p1(n, row),
+                            p2(n, row),
+                            p3(n, row),
+                            p4(n, row),
+                            p5(n, row),
+                            p6(n, row),
+                            p7(n, row),
+                            tempA(n, row),
+                            tempB(n, row);
+                            
+        for(int i=0; i<n; i++)
+        {
+            for(int j=0; j<n; j++)
+            {
+                A11[i][j]=A[i][j];
+                A12[i][j]=A[i][n+j];
+                A21[i][j]=A[n+i][j];
+                A22[i][j]=A[n+i][n+j];
+                
+                B11[i][j]=B[i][j];
+                B12[i][j]=B[i][n+j];
+                B21[i][j]=B[n+i][j];
+                B22[i][j]=B[n+i][n+j];
+            }
+        }
+        
+        // s1 = b12 - b22
+        sub(B12, B22, s1, n);
+        
+        // s2 = a11 + a12
+        add(A11, A12, s2, n);
+
+        // s3 = a21 + a22
+        add(A21, A22, s3, n);
+
+        // s4 = b21 - b11
+        sub(B21, B11, s4, n);
+        
+        // s5 = a11 + a22
+        add(A11, A22, s5, n);
+        
+        // s6 = b11 + b22
+        add(B11, B22, s6, n);
+
+        // s7 = a12 - a22
+        sub(A12, A22, s7, n);
+
+        // s8 = b21 + b22
+        add(B21, B22, s8, n);
+
+        // s9 = a11 - a21
+        sub(A11, A21, s9, n);
+
+        // s10 = b11 + b12
+        add(B11, B12, s10, n);
+
+        // p1 = a11 * s1
+        matrixMultiply(A11, s1, p1, n);
+
+        // p2 = s2 * b22
+        matrixMultiply(s2, B22, p2, n);
+
+        // p3 = s3 * b11
+        matrixMultiply(s3, B11, p3, n);
+
+        // p4 = a22 * s4
+        matrixMultiply(A22, s4, p4, n);
+
+        // p5 = s5 * s6
+        matrixMultiply(s5, s6, p5, n); 
+
+        // p6 = s7 * s8
+        matrixMultiply(s7, s8, p6, n);
+
+        // p7 = s9 * s10
+        matrixMultiply(s9, s10, p7, n);
+        
+        // c11 = p5 + p4 - p2 + p6
+        add(p5, p4, tempA, n); // p5 + p4
+        add(tempA, p6, tempB, n); // (p5 + p4) + p6
+        sub(tempB, p2, C11, n); // (p5 + p4 + p6) - p2
+
+        // c12 = p1 + p2
+        add(p1, p2, C12, n);
+
+        // c21 = p3 + p4
+        add(p3, p4, C21, n);
+
+        // c22 = p5 + p1 - p3 + p7
+        add(p5, p1, tempA, n); // p5 + p1
+        sub(tempA, p3, tempB, n); // (p5 + p1) - p3
+        sub(tempB, p7, C22, n); // (p5 + p1 - p3) - p7
+
+        
+        for(int i=0; i<n; i++)
+        {
+            for(int j=0; j<n; j++)
+            {
+                C[i][j]=C11[i][j];
+                C[i][n+j]=C12[i][j];
+                C[n+i][j]=C21[i][j];
+                C[n+i][n+j]=C22[i][j];
+            }
+        }
+    }
+}
+
+
+
+int main() {
+    int n;
+    cin>>n;
+    vector< vector<int>> A(n, vector<int> (n,0)), B(n, vector<int> (n,0)), C(n, vector<int> (n,0));
+    for(int i=0; i<n; i++)
+    {
+        for(int j=0; j<n; j++)
+        {
+            cin>>A[i][j];
+        }
+    }
+    for(int i=0; i<n; i++)
+    {
+        for(int j=0; j<n; j++)
+        {
+            cin>>B[i][j];
+        }
+    }
+    matrixMultiply(A,B,C,n);
+    for(int i=0; i<n; i++)
+    {
+        for(int j=0; j<n; j++)
+        {
+            cout<<C[i][j]<<' ';
+        }
+        cout<<'\n';
+    }
+    return 0;
+}
