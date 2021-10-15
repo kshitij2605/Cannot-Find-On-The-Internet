@@ -1,0 +1,227 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+struct node{
+    int pow, coeff;
+    struct node* next;
+};
+
+typedef struct node node;
+
+node* create_node(int pow, int coeff)
+{
+    node* temp = malloc(sizeof(node));
+    temp->pow = pow;
+    temp->coeff = coeff;
+    temp->next = NULL;
+    return temp;
+}
+
+node* create_linked_list(node* head)
+{
+    int deg, coeff;
+    node* new_node, *tail;
+    scanf("%d", &deg);
+
+    for(int i=deg; i>=0; i--)
+    {
+        scanf("%d", &coeff);
+        new_node = create_node(i, coeff);
+        if(head == NULL)
+        {
+            head = new_node;
+            tail = head;
+        }
+        else
+        {
+            tail->next = new_node;
+            tail = new_node;
+        }
+    }
+    return head;
+}
+
+void print_linked_list(node* head)
+{
+    node* temp = head;
+    if(temp == NULL)
+    {
+        printf("%d", -1);
+        return;
+    }
+    while(temp != NULL)
+    {
+        if(temp == head && temp->coeff != 0)
+        {
+            printf("%dx^%d ", temp->coeff, temp->pow);
+        }
+        else if(temp->next == NULL && temp->coeff != 0)
+        {
+            if(temp->coeff < 0)
+                printf("%d", temp->coeff);
+            else
+                printf("+ %d", temp->coeff);
+        }
+        else if(temp->coeff != 0)
+        {
+            if(temp->coeff < 0)
+                printf("%dx^%d ", temp->coeff, temp->pow);
+            else
+                printf("+ %dx^%d ", temp->coeff, temp->pow);
+        }
+        temp = temp->next;
+    }
+    printf("\n");
+    return;
+}
+
+node* add_poly(node* head1, node* head2)
+{
+    node* head = NULL, *tail, *temp1, *temp2, *new_node;
+    int new_coeff;
+    
+    if(head1->pow >= head2->pow)
+    {
+        temp1 = head1;
+        temp2 = head2;
+    }
+    else
+    {
+        temp1 = head2;
+        temp2 = head1;
+    }
+    
+    while(temp1->pow != temp2->pow)
+    {
+        new_node = create_node(temp1->pow, temp1->coeff);
+        if(head == NULL)
+        {
+            head = new_node;
+            tail = head;
+        }
+        else
+        {
+            tail->next = new_node;
+            tail = new_node;
+        }
+        temp1 = temp1->next;
+    }
+    
+    while(temp1 != NULL)
+    {
+        new_coeff = temp1->coeff + temp2->coeff;
+        new_node = create_node(temp1->pow, new_coeff);
+        if(head == NULL)
+        {
+            head = new_node;
+            tail = head;
+        }
+        else
+        {
+            tail->next = new_node;
+            tail = new_node;
+        }
+        temp1 = temp1->next;     
+        temp2 = temp2->next;
+    }
+    return head;
+}
+
+node* subtract_poly(node* head1, node *head2)
+{
+    node* head = NULL, *tail, *temp1, *temp2, *new_node;
+    int new_coeff;
+    
+    if(head1->pow >= head2->pow)
+    {
+        temp1 = head1;
+        temp2 = head2;
+    }
+    else
+    {
+        temp1 = head2;
+        temp2 = head1;
+    }
+    
+    while(temp1->pow != temp2->pow)
+    {
+        if(head1->pow > head2->pow)
+            new_node = create_node(temp1->pow, temp1->coeff);
+        else
+            new_node = create_node(temp1->pow, -temp1->coeff);
+        if(head == NULL)
+        {
+            head = new_node;
+            tail = head;
+        }
+        else
+        {
+            tail->next = new_node;
+            tail = new_node;
+        }
+        temp1 = temp1->next;
+    }
+    
+    while(temp1 != NULL)
+    {
+        if(head1->pow > head2->pow)
+            new_coeff = temp1->coeff - temp2->coeff;
+        else
+            new_coeff = temp2->coeff - temp1->coeff;
+        new_node = create_node(temp1->pow, new_coeff);
+        if(head == NULL)
+        {
+            head = new_node;
+            tail = head;
+        }
+        else
+        {
+            tail->next = new_node;
+            tail = new_node;
+        }
+        temp1 = temp1->next;     
+        temp2 = temp2->next;
+    }
+    return head;  
+}
+
+void evaluate_poly(node* head, int x)
+{
+    node* temp = head;
+    int sum = 0;
+    while(temp != NULL)
+    {
+        sum += pow(x, temp->pow) * temp->coeff;
+        temp = temp->next;
+    }
+    printf("%d\n", sum);
+    return;
+}
+
+int main()
+{
+    int k, x;
+    scanf("%d", &k);
+    for(int i=0; i<k; i++)
+    {
+        node* head1 = NULL, *head2 = NULL, *head3 = NULL, *head4 = NULL;
+        
+        head1 = create_linked_list(head1);
+        head2 = create_linked_list(head2);
+        scanf("%d", &x);
+        
+        head3 = add_poly(head1, head2);
+        head4 = subtract_poly(head1, head2);
+        
+        printf("P1(x): "); print_linked_list(head1);
+        printf("P2(x): "); print_linked_list(head2);
+        printf("P3(x) = P1(x) + P2(x): "); print_linked_list(head3);
+        printf("P4(x) = P1(x) - P2(x): "); print_linked_list(head4);
+        printf("P1(%d) = ", x); evaluate_poly(head1, x);
+        printf("P2(%d) = ", x); evaluate_poly(head2, x);
+        printf("P3(%d) = ", x); evaluate_poly(head3, x);
+        printf("P4(%d) = ", x); evaluate_poly(head4, x);
+    }
+    return 0;
+}
